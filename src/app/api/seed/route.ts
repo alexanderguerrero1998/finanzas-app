@@ -16,11 +16,7 @@ const defaultCategories = [
   { name: "Otros gastos", icon: "more-horizontal", color: "#64748b", type: "expense" },
 ];
 
-export async function GET() {
-  return POST();
-}
-
-export async function POST() {
+async function runSeed() {
   try {
     const existing = await prisma.category.count();
     if (existing === 0) {
@@ -43,4 +39,12 @@ export async function POST() {
       { status: 500 }
     );
   }
+}
+
+export async function GET() {
+  return runSeed();
+}
+
+export async function POST() {
+  return runSeed();
 }
