@@ -54,7 +54,7 @@ export default function PresupuestosPage() {
   const formatCurrency = (n: number) =>
     new Intl.NumberFormat("es", {
       style: "currency",
-      currency: "MXN",
+      currency: "USD",
     }).format(n);
 
   const getSpent = (categoryName: string) =>

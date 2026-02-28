@@ -50,7 +50,7 @@ export default function DashboardPage() {
   const formatCurrency = (n: number) =>
     new Intl.NumberFormat("es", {
       style: "currency",
-      currency: "MXN",
+      currency: "USD",
     }).format(n);
 
   const pieData = summary?.categoryBreakdown.map((c, i) => ({

@@ -41,7 +41,7 @@ export default function TransaccionesPage() {
   const formatCurrency = (n: number) =>
     new Intl.NumberFormat("es", {
       style: "currency",
-      currency: "MXN",
+      currency: "USD",
     }).format(n);
 
   const formatDate = (d: string) =>
