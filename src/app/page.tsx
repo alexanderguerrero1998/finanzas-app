@@ -1,65 +1,189 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState, useEffect } from "react";
+import {
+  TrendingUp,
+  TrendingDown,
+  Wallet,
+  ArrowLeft,
+  ArrowRight,
+} from "lucide-react";
+import {
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+} from "recharts";
+import { AddTransactionButton } from "@/components/AddTransactionButton";
+
+type Summary = {
+  month: number;
+  year: number;
+  income: number;
+  expense: number;
+  balance: number;
+  transactions: number;
+  categoryBreakdown: { name: string; total: number; color: string | null }[];
+};
+
+const MONTHS = [
+  "Ene", "Feb", "Mar", "Abr", "May", "Jun",
+  "Jul", "Ago", "Sep", "Oct", "Nov", "Dic",
+];
+
+export default function DashboardPage() {
+  const [summary, setSummary] = useState<Summary | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [month, setMonth] = useState(new Date().getMonth() + 1);
+  const [year, setYear] = useState(new Date().getFullYear());
+
+  useEffect(() => {
+    setLoading(true);
+    fetch(`/api/summary?month=${month}&year=${year}`)
+      .then((r) => r.json())
+      .then(setSummary)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [month, year]);
+
+  const formatCurrency = (n: number) =>
+    new Intl.NumberFormat("es", {
+      style: "currency",
+      currency: "MXN",
+    }).format(n);
+
+  const pieData = summary?.categoryBreakdown.map((c, i) => ({
+    name: c.name,
+    value: c.total,
+    color: c.color || `hsl(${(i * 60) % 360}, 70%, 50%)`,
+  })) ?? [];
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h1 className="text-2xl font-bold">Dashboard</h1>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              if (month === 1) {
+                setMonth(12);
+                setYear((y) => y - 1);
+              } else {
+                setMonth((m) => m - 1);
+              }
+            }}
+            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <span className="font-medium min-w-[120px] text-center">
+            {MONTHS[month - 1]} {year}
+          </span>
+          <button
+            onClick={() => {
+              if (month === 12) {
+                setMonth(1);
+                setYear((y) => y + 1);
+              } else {
+                setMonth((m) => m + 1);
+              }
+            }}
+            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
           >
-            Documentation
-          </a>
+            <ArrowRight className="w-5 h-5" />
+          </button>
         </div>
-      </main>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full" />
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+              <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 mb-1">
+                <TrendingUp className="w-5 h-5" />
+                <span className="text-sm font-medium">Ingresos</span>
+              </div>
+              <p className="text-xl font-bold">
+                {summary ? formatCurrency(summary.income) : "—"}
+              </p>
+            </div>
+            <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+              <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 mb-1">
+                <TrendingDown className="w-5 h-5" />
+                <span className="text-sm font-medium">Gastos</span>
+              </div>
+              <p className="text-xl font-bold">
+                {summary ? formatCurrency(summary.expense) : "—"}
+              </p>
+            </div>
+            <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+              <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 mb-1">
+                <Wallet className="w-5 h-5" />
+                <span className="text-sm font-medium">Balance</span>
+              </div>
+              <p
+                className={`text-xl font-bold ${
+                  summary && summary.balance >= 0
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-rose-600 dark:text-rose-400"
+                }`}
+              >
+                {summary ? formatCurrency(summary.balance) : "—"}
+              </p>
+            </div>
+          </div>
+
+          {pieData.length > 0 && (
+            <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+              <h2 className="text-lg font-semibold mb-4">
+                Gastos por categoría
+              </h2>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={90}
+                      paddingAngle={2}
+                      dataKey="value"
+                      nameKey="name"
+                      label={({ name, percent }) =>
+                        `${name} ${((percent ?? 0) * 100).toFixed(0)}%`
+                      }
+                    >
+                      {pieData.map((entry, index) => (
+                        <Cell key={index} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      formatter={(value: number | undefined) =>
+                        formatCurrency(value ?? 0)
+                      }
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
+
+          {summary?.transactions === 0 && (
+            <div className="p-8 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center text-slate-500 dark:text-slate-400">
+              <p className="mb-2">No hay transacciones este mes.</p>
+              <p className="text-sm">Usa el botón + para añadir tu primera transacción.</p>
+            </div>
+          )}
+        </>
+      )}
+
+      <AddTransactionButton />
     </div>
   );
 }
