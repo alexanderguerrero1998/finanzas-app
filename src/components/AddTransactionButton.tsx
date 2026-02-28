@@ -11,7 +11,7 @@ export function AddTransactionButton() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-6 flex items-center justify-center w-14 h-14 rounded-full bg-emerald-600 text-white shadow-lg hover:bg-emerald-700 transition-colors z-50"
+        className="fixed bottom-20 right-4 md:bottom-6 md:right-6 flex items-center justify-center w-14 h-14 rounded-full bg-emerald-600 text-white shadow-lg hover:bg-emerald-700 transition-colors z-50"
         aria-label="Añadir transacción"
       >
         <Plus className="w-6 h-6" />

@@ -143,15 +143,15 @@ export default function DashboardPage() {
               <h2 className="text-lg font-semibold mb-4">
                 Gastos por categoría
               </h2>
-              <div className="h-64">
+              <div className="h-48 sm:h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
                       data={pieData}
                       cx="50%"
                       cy="50%"
-                      innerRadius={60}
-                      outerRadius={90}
+                      innerRadius="40%"
+                      outerRadius="65%"
                       paddingAngle={2}
                       dataKey="value"
                       nameKey="name"
